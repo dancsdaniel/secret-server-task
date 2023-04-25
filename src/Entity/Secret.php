@@ -20,14 +20,19 @@ class Secret
     #[ORM\Column(length: 255)]
     private ?string $secretText = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $createdAt = null;
+    #[ORM\Column(type: 'datetime_immutable_micro')]
+    private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $expiresAt = null;
+    #[ORM\Column(type: 'datetime_immutable_micro', nullable: true)]
+    private ?\DateTimeImmutable $expiresAt = null;
 
     #[ORM\Column]
     private ?int $remainingViews = null;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTimeImmutable("now");
+    }
 
     public function getId(): ?int
     {
@@ -41,7 +46,7 @@ class Secret
 
     public function setHash(string $hash): self
     {
-        $this->hash = $hash;
+        $this->hash = sha1($hash);
 
         return $this;
     }
@@ -55,29 +60,34 @@ class Secret
     {
         $this->secretText = $secretText;
 
+        $this->setHash(random_bytes(5) . $this->secretText . random_bytes(5));
+        
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self
     {
         $this->createdAt = $createdAt;
 
         return $this;
     }
 
-    public function getExpiresAt(): ?\DateTimeInterface
+    public function getExpiresAt(): ?\DateTimeImmutable
     {
         return $this->expiresAt;
     }
 
-    public function setExpiresAt(\DateTimeInterface $expiresAt): self
+    public function setExpiresAt(int $minutes): self
     {
-        $this->expiresAt = $expiresAt;
+        if ($minutes > 0)
+        {
+            $this->expiresAt = new \DateTimeImmutable('+' . $minutes . ' minutes');
+        }
 
         return $this;
     }
@@ -90,6 +100,13 @@ class Secret
     public function setRemainingViews(int $remainingViews): self
     {
         $this->remainingViews = $remainingViews;
+
+        return $this;
+    }
+
+    public function minusRemainingViews(): self
+    {
+        $this->remainingViews--;
 
         return $this;
     }

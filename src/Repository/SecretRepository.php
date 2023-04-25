@@ -54,13 +54,18 @@ class SecretRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Secret
-//    {
-//        return $this->createQueryBuilder('s')
-//            ->andWhere('s.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    public function findValidHash($hash): ?Secret
+    {
+        $query = $this->createQueryBuilder('s')
+            ->andWhere('s.hash = :hash')
+            ->andWhere('s.expiresAt IS NULL OR s.expiresAt > :now')
+            ->andWhere('s.remainingViews > 0')
+            ->setParameter('hash', $hash)
+            ->setParameter('now', new \DateTimeImmutable())
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+
+        return $query;
+    }
 }
