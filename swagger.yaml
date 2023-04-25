@@ -3,8 +3,8 @@ info:
   description: "This is an API of a secret service. You can save your secret by using the API. You can restrict the access of a secret after the certen number of views or after a certen period of time."
   version: "1.0.0"
   title: "Secret Server"
-host: "api.your-secret-server.com"
-basePath: "/v1"
+host: "guarded-peak-13020.herokuapp.com"
+basePath: "/api"
 tags:
 - name: "secret"
   externalDocs:
